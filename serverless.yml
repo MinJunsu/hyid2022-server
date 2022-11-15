@@ -47,12 +47,23 @@ functions:
     handler: handlers/work-detail-like.handler
     events:
       - http:
-          method: POST
+          method: GET
           path: /works/{id}/like
           request:
               parameters:
                 paths:
                   id: true
+
+  workDetailCreateLike:
+    handler: handlers/work-detail-like-create.handler
+    events:
+      - http:
+          method: GET
+          path: /works/{id}/like/create
+          request:
+            parameters:
+              paths:
+                id: true
 
   studentList:
     handler: handlers/student-list.handler
