@@ -1,0 +1,81 @@
+service: hyid2022-prisma-aws-lambda
+plugins:
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  region: ap-northeast-2
+  runtime: nodejs16.x
+  stage: prod
+  deploymentBucket:
+    name: hyid2022-lambda-bucket
+  deploymentPrefix: '/'
+  apiName: hyid2022-api
+  endpointType: REGIONAL
+  httpApi:
+    cors: true
+  profile: hyid2022
+
+
+functions:
+  index:
+    handler: handlers/index.handler
+    events:
+      - http:
+          method: GET
+          path: /
+
+  category:
+    handler: handlers/category.handler
+    events:
+      - http:
+          method: GET
+          path: /category
+
+  workDetail:
+    handler: handlers/work-detail.handler
+    events:
+      - http:
+          method: GET
+          path: /works/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+
+  workDetailLike:
+    handler: handlers/work-detail-like.handler
+    events:
+      - http:
+          method: POST
+          path: /works/{id}/like
+          request:
+              parameters:
+                paths:
+                  id: true
+
+  studentList:
+    handler: handlers/student-list.handler
+    events:
+      - http:
+          method: GET
+          path: /students
+
+  studentDetail:
+    handler: handlers/student-detail.handler
+    events:
+      - http:
+          method: GET
+          path: /students/{id}
+          request:
+            parameters:
+              paths:
+                  id: true
+
+# only include the Prisma binary required on AWS Lambda while packaging
+package:
+  patterns:
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-*'
+    - '!node_modules/prisma/libquery_engine-*'
+    - '!node_modules/@prisma/engines/**'

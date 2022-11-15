@@ -1,0 +1,128 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id           Int               @id @default(autoincrement())
+  isManager    Boolean           @default(false)
+  studentId    Int
+  name         String
+  nameKor      String
+  profileImage String
+  email        String?
+  snsLink      String?
+  webSite      String?
+  tags         StudentsOnTags[]
+  works        StudentsOnWorks[]
+}
+
+model ViewCount {
+  id        Int      @id @default(autoincrement())
+  created   DateTime @db.Date
+  ipAddress String
+
+  @@unique([created, ipAddress])
+}
+
+model Tag {
+  id       Int              @id @default(autoincrement())
+  name     String           @unique
+  students StudentsOnTags[]
+}
+
+model StudentsOnTags {
+  id        Int     @id @default(autoincrement())
+  studentId Int
+  tagId     Int
+  student   Student @relation(fields: [studentId], references: [id])
+  tag       Tag     @relation(fields: [tagId], references: [id])
+
+  @@index([studentId], map: "StudentsOnTags_studentId_fkey")
+  @@index([tagId], map: "StudentsOnTags_tagId_fkey")
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  works Work[]
+}
+
+model Work {
+  id                 Int                 @id @default(autoincrement())
+  categoryId         Int
+  title              String
+  description        String              @db.Text
+  subTitle           String
+  category           Category            @relation(fields: [categoryId], references: [id])
+  likes              Like[]
+  students           StudentsOnWorks[]
+  workBackdropImage  WorkBackdropImage?
+  mainImages         WorkImage[]
+  workProfileImage   WorkProfileImage?
+  workThumbnailImage WorkThumbnailImage?
+
+  @@index([categoryId], map: "Work_categoryId_fkey")
+}
+
+model WorkThumbnailImage {
+  id     Int    @id @default(autoincrement())
+  workId Int    @unique
+  image  String
+  width  Int
+  height Int
+  work   Work   @relation(fields: [workId], references: [id])
+}
+
+model WorkBackdropImage {
+  id     Int    @id @default(autoincrement())
+  workId Int    @unique
+  image  String
+  width  Int
+  height Int
+  work   Work   @relation(fields: [workId], references: [id])
+}
+
+model WorkProfileImage {
+  id     Int    @id @default(autoincrement())
+  workId Int    @unique
+  image  String
+  width  Int
+  height Int
+  work   Work   @relation(fields: [workId], references: [id])
+}
+
+model WorkImage {
+  id     Int    @id @default(autoincrement())
+  workId Int
+  image  String
+  width  Int
+  height Int
+  work   Work   @relation(fields: [workId], references: [id])
+
+  @@index([workId], map: "WorkImage_workId_fkey")
+}
+
+model Like {
+  workId    Int
+  ipAddress String
+  work      Work   @relation(fields: [workId], references: [id])
+
+  @@unique([workId, ipAddress])
+}
+
+model StudentsOnWorks {
+  id        Int     @id @default(autoincrement())
+  studentId Int
+  workId    Int
+  student   Student @relation(fields: [studentId], references: [id])
+  work      Work    @relation(fields: [workId], references: [id])
+
+  @@index([studentId], map: "StudentsOnWorks_studentId_fkey")
+  @@index([workId], map: "StudentsOnWorks_workId_fkey")
+}
